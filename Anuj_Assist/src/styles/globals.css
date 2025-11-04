@@ -1,0 +1,28 @@
+/* Ensure anchor tags inside chat bubbles wrap and break on small screens */
+.max-w-\[80\%\] a {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  display: inline-block;
+  max-width: 100%;
+}
+@import "tailwindcss";
+
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background: #f8fafc;
+  color: #222;
+}
+
+input, button {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e5e7eb;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
