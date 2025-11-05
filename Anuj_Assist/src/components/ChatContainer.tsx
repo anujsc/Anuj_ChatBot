@@ -1,5 +1,5 @@
 // ChatContainer: main chat logic and UI
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useChat from '../hooks/useChat';
 import type { Message, ChatBubbleProps } from '../types/chat';
 import { Suspense } from 'react';
@@ -64,9 +64,12 @@ const ChatContainer = () => {
     }
   }, [typewriterText, currentLineIndex, messages.length, lines]);
 
+  // Ref for auto-scroll
+  const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const el = document.getElementById('messages');
-    if (el) el.scrollTop = el.scrollHeight;
+    if (endOfMessagesRef.current) {
+      endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, typing]);
 
   // Memoize input handlers for performance
@@ -98,7 +101,7 @@ const ChatContainer = () => {
           <span className="text-gray-800 font-medium">Save history</span>
         </label>
       </div>
-      
+
       {/* Messages container */}
       <div
         id="messages"
@@ -191,6 +194,8 @@ const ChatContainer = () => {
             <Loader />
           </Suspense>
         )}
+        {/* Auto-scroll anchor */}
+        <div ref={endOfMessagesRef} />
       </div>
       {error && (
         <div className="text-red-600 text-xs mb-2" role="alert">{error}</div>
