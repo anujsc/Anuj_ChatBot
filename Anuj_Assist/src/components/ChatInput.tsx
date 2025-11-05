@@ -55,7 +55,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, loading 
             className={`transition-transform -rotate-45 duration-400 ease-in-out ${animate ? 'animate-send' : ''}`}
             style={{ display: 'inline-block' }}
           >
-            <AiOutlineSend color="blue" size={30} />
+            <AiOutlineSend color="#ba3f47" size={30} />
           </span>
         </span>
         <style>{`

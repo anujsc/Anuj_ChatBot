@@ -41,7 +41,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content, profileIcon, tim
               (visible && animate !== false) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             } ${
               role === 'user'
-                ? 'bg-blue-600 text-white self-end font-sans'
+                ? 'bg-[#ba3f47] text-white self-end font-sans'
                 : 'bg-gray-200 text-gray-900 self-start font-mono border border-[#eaf1fb]'
             }`}
             style={role === 'user' ? {} : { fontFamily: 'Fira Mono, Menlo, monospace', fontSize: '1rem', letterSpacing: '-0.5px', wordBreak: 'break-word', overflowWrap: 'anywhere' }}
