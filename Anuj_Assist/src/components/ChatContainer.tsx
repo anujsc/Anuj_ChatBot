@@ -37,7 +37,7 @@ const ChatContainer = () => {
   return (
   <section className="flex flex-col h-[80vh] w-[120vh]  rounded-2xl bg-linear-to-br from-gray-200 via-gray-100 to-gray-300 shadow-xl p-6">
       <div className="flex justify-between  items-center mb-4">
-        <span className="font-medium text-xl text-gray-800 flex items-center gap-2 tracking-tighter">
+        <span className="font-medium text-xl text-gray-700 flex items-center gap-2 tracking-tighter">
           <span role="img" aria-label="message">💬</span> Chat with Anuj 
         </span>
         <label className="flex items-center gap-2 text-xs select-none">
