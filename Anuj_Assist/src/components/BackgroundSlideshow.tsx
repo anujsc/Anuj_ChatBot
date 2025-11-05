@@ -4,12 +4,20 @@ import React from 'react';
 
 
 const SLIDESHOW_INTERVAL = 5000;
-const FADE_DURATION = 100000; // ms
+const FADE_DURATION = 800; // ms (should match App)
 
 const BackgroundSlideshow: React.FC = () => {
   const [current, setCurrent] = React.useState(0);
   const [prev, setPrev] = React.useState(0);
   const [showPrev, setShowPrev] = React.useState(false);
+
+
+  // Preload next image for smooth transition
+  React.useEffect(() => {
+    const nextIdx = (current + 1) % bgImages.length;
+    const img = new window.Image();
+    img.src = bgImages[nextIdx];
+  }, [current]);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
