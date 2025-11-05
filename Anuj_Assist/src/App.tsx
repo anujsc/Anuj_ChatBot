@@ -3,14 +3,20 @@ import React from 'react';
 import Header from './components/Header';
 import ChatContainer from './components/ChatContainer';
 import './App.css';
+import BackgroundSlideshow from './components/BackgroundSlideshow';
 
 
-//import image 
+
+
+
 
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[url('https://i.pinimg.com/736x/8b/3d/bd/8b3dbd49e14c81dd69ca3b1bab903a1b.jpg')] flex flex-col items-center">
+    <div className="min-h-screen bg-cover flex flex-col items-center relative">
+      {/* Black background fallback for slideshow */}
+      <div className="fixed inset-0 -z-30 bg-[url('https://i.pinimg.com/1200x/1b/97/72/1b97721243e76f0e56a73a274a45bfb0.jpg')] bg-cover" aria-hidden="true" />
+      <BackgroundSlideshow />
       <Header />
       <main className="flex w-full max-w-2xl px-2 py-4">
         <ChatContainer />
