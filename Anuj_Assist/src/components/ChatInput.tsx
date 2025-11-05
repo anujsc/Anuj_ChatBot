@@ -2,8 +2,10 @@
 import React, { useRef, useState } from 'react';
 import { AiOutlineSend } from 'react-icons/ai';
 
-const ChatInput = ({ value, onChange, onSend, loading }) => {
-  const inputRef = useRef(null);
+import type { ChatInputProps } from '../types/chat';
+
+const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, loading }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -12,7 +14,7 @@ const ChatInput = ({ value, onChange, onSend, loading }) => {
 
   const [animate, setAnimate] = useState(false);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !loading) {
       triggerSend();
     } else if (e.key === 'Escape') {
@@ -25,7 +27,7 @@ const ChatInput = ({ value, onChange, onSend, loading }) => {
     setTimeout(() => {
       setAnimate(false);
       onSend();
-    }, 400); // Animation duration
+    }, 500); // Animation duration
   };
 
   return (

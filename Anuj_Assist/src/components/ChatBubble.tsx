@@ -3,21 +3,24 @@ import React from 'react';
 
 
 // Helper to render links clickable and remove markdown stars
-function formatBotContent(text) {
+function formatBotContent(text: string): string {
   // Remove markdown bold/italic stars
   let clean = text.replace(/\*\*/g, '').replace(/\*/g, '');
   // Convert URLs to clickable links
-  clean = clean.replace(/(https?:\/\/[^\s>]+)/g, (url) => {
+  clean = clean.replace(/(https?:\/\/[^\s>]+)/g, (url: string) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#1549e6;text-decoration:underline;">${url}</a>`;
   });
   return clean;
 }
 
-const ChatBubble = ({ role, content, profileIcon, time }) => {
+import type { ChatBubbleProps } from '../types/chat';
+
+const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content, profileIcon, time, animate }) => {
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
     setVisible(true);
   }, []);
+  // Use 'animate' prop to control transition (if needed in future)
   return (
     <div
       className={`my-2 flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -35,7 +38,7 @@ const ChatBubble = ({ role, content, profileIcon, time }) => {
           {/* Message Bubble */}
           <div
             className={`px-4 py-2 rounded-lg shadow text-base whitespace-pre-line transition-all duration-500 ease-out ${
-              visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              (visible && animate !== false) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             } ${
               role === 'user'
                 ? 'bg-blue-600 text-white self-end font-sans'

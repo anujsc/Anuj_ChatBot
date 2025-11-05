@@ -5,7 +5,7 @@ import anujProfile from '../data/anujProfile';
 import { fetchReadme } from '../utils/github';
 
 const PROJECTS = ['EMS', 'URLShortener', 'ImgEnhancer', 'SCSDB'];
-const GITHUB_MAP = {
+const GITHUB_MAP: Record<string, { owner: string; repo: string }> = {
   EMS: { owner: 'anujsc', repo: 'EMS' },
   URLShortener: { owner: 'anujsc', repo: 'URL_SHORTNER' },
   ImgEnhancer: { owner: 'anujsc', repo: 'ImgEnhancer' },
@@ -13,26 +13,26 @@ const GITHUB_MAP = {
 };
 const MAX_README_CHARS = 15000;
 
-function detectProject(text) {
-  return PROJECTS.find(p => text.toLowerCase().includes(p.toLowerCase()));
+function detectProject(text: string): string | undefined {
+  return PROJECTS.find((p: string) => text.toLowerCase().includes(p.toLowerCase()));
 }
 
 const useChat = () => {
   // Generate a rich system prompt from anujProfile
-  function buildSystemPrompt(profile) {
+  function buildSystemPrompt(profile: any): string {
     let prompt = `You are an expert assistant for Anuj Chaudhari's portfolio. Use only the following data to answer questions about Anuj:
 `;
     prompt += `Name: ${profile.name}\nTitle: ${profile.title}\nLocation: ${profile.location}\nEmail: ${profile.email}\nGitHub: ${profile.github}\nPortfolio: ${profile.portfolio}\nLinkedIn: ${profile.linkedin}\n`;
     prompt += `\nExperience:\n`;
-    profile.experience.forEach(exp => {
+    profile.experience.forEach((exp: any) => {
       prompt += `- ${exp.role} at ${exp.company} (${exp.period}): ${exp.details.join(' ')}\n`;
     });
     prompt += `\nSkills:\n`;
     Object.entries(profile.skills).forEach(([cat, arr]) => {
-      prompt += `- ${cat}: ${arr.join(', ')}\n`;
+      prompt += `- ${cat}: ${(arr as string[]).join(', ')}\n`;
     });
     prompt += `\nProjects:\n`;
-    profile.projects.forEach(proj => {
+    profile.projects.forEach((proj: any) => {
       prompt += `- ${proj.name}: ${proj.description} (Tech: ${proj.tech.join(', ')}) Repo: ${proj.repo}\n`;
     });
     prompt += `\nEducation: ${profile.education.degree} from ${profile.education.institute} (${profile.education.period}), CGPA: ${profile.education.cgpa}\n`;
@@ -97,7 +97,7 @@ const useChat = () => {
         ];
       } else {
         // Fallback to profile project text
-        const proj = anujProfile.projects[project];
+  const proj = (anujProfile.projects as Record<string, any>)[project];
         newMessages = [
           { role: 'system', content: systemPrompt },
           ...newMessages.slice(-6),
@@ -114,7 +114,7 @@ const useChat = () => {
       botMsg = await callChat({ messages: newMessages });
       setMessages([...messages, userMsg, { role: 'assistant', content: botMsg }]);
     } catch (e) {
-      setError(e.message);
+      setError((e as Error).message);
       setMessages([...messages, userMsg]);
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ const useChat = () => {
   };
 
   return {
-    messages: messages.filter(m => m.role !== 'system'),
+    messages: messages.filter((m: any) => m.role !== 'system'),
     input,
     setInput,
     sendMessage,

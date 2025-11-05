@@ -1,6 +1,7 @@
 // ChatContainer: main chat logic and UI
-import React from 'react';
+import React, { useState } from 'react';
 import useChat from '../hooks/useChat';
+import type { Message, ChatBubbleProps } from '../types/chat';
 import { Suspense } from 'react';
 import ChatInput from './ChatInput';
 import Loader from './Loader';
@@ -19,11 +20,19 @@ const ChatContainer = () => {
     toggleSaveHistory
   } = useChat();
 
+  const [isShow] = useState(true);
+
   React.useEffect(() => {
     const el = document.getElementById('messages');
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, typing]);
 
+
+  // React.useEffect(() => {  
+  //   setTimeout(() => {
+  //     setIsShow(true);
+  //   }, 2000);
+  // }, []); 
 
   return (
   <section className="flex flex-col h-[80vh]  rounded-2xl bg-linear-to-br from-gray-200 via-gray-100 to-gray-300 shadow-xl p-6">
@@ -83,25 +92,27 @@ const ChatContainer = () => {
             <span className="text-3xl mb-2" role="img" aria-label="robot">🤖</span>
           </div>
         )}
-        <Suspense fallback={<div className="animate-pulse h-12 bg-gray-100 rounded mb-2 w-2/3 mx-auto" />}> 
-          {messages.map((msg, i) => {
-            // Choose profile icon
+
+        {isShow && <Suspense fallback={<div className="animate-pulse h-12 bg-gray-100 rounded mb-2 w-2/3 mx-auto" />}> 
+          {(messages as Message[]).map((msg, i) => {
             const profileIcon = msg.role === 'user'
               ? 'https://ui-avatars.com/api/?name=You&background=1549e6&color=fff&size=48'
               : 'https://ui-avatars.com/api/?name=AI&background=fbc2eb&color=1549e6&size=48';
-            // Get current time for each message
             const time = msg.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const bubbleProps: ChatBubbleProps = {
+              ...msg,
+              profileIcon,
+              time,
+              animate: true,
+            };
             return (
               <ChatBubble
                 key={i}
-                {...msg}
-                profileIcon={profileIcon}
-                time={time}
-                animate
+                {...bubbleProps}
               />
             );
           })}
-        </Suspense>
+        </Suspense>}
         {typing && <Loader />}
       </div>
       {error && (

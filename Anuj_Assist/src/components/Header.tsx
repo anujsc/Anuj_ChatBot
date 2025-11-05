@@ -1,5 +1,4 @@
-// Header component
-import React from 'react';
+// Header componen
 
 const Header = () => (
   <header className="w-full py-4 bg-blue-700 text-white text-center shadow">
