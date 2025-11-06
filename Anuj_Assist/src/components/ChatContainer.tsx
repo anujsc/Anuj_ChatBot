@@ -19,9 +19,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
     sendMessage,
     loading,
     error,
-    typing,
-    saveHistory,
-    toggleSaveHistory
+    typing
   } = useChat();
 
   const [isShow] = useState(true);
@@ -88,23 +86,6 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
           <span role="img" aria-label="message">💬</span> Chat with Anuj 
         </span>
         <div className="flex items-center gap-3">
-          {/* <label className="flex items-center gap-2 text-xs select-none">
-            <span className="relative inline-block w-10 h-5 align-middle">
-              <input
-                type="checkbox"
-                checked={saveHistory}
-                onChange={toggleSaveHistory}
-                className="peer opacity-0 w-10 h-5 absolute cursor-pointer"
-              />
-              <span
-                className="block w-10 h-5 bg-gray-300 rounded-full transition-colors duration-300 peer-checked:bg-[#ba3f47]"
-              ></span>
-              <span
-                className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"
-              ></span>
-            </span>
-            <span className="text-gray-800 font-medium">Save history</span>
-          </label> */}
           <button
             className="ml-2 px-4 py-2 tracking-tighter rounded-lg bg-linear-to-r from-[#721319] to-[#ba3f47] text-white font-semibold shadow hover:scale-105 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-[#6C63FF]"
             onClick={() => setShowContact(true)}
