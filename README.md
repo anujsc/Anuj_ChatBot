@@ -3,6 +3,7 @@
 A modern, Gen-Z-inspired, fully responsive portfolio chatbot and contact platform built with **React**, **TypeScript**, **TailwindCSS**, **Framer Motion**, and **Groq Cloud** (OpenAI-compatible LLM).  
 It features animated chat, project explanations from your GitHub, a beautiful contact form with EmailJS integration, and a dynamic, animated background.
 
+Deployed Url:https://anujchatbot.netlify.app/
 ---
 
 ## ✨ Features
