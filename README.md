@@ -31,7 +31,8 @@ It features animated chat, project explanations from your GitHub, a beautiful co
 
 ## 🚀 Getting Started
 
-### 1. Clone & Install
+
+1. Clone & Install
 
 ```bash
 git clone https://github.com/anujsc/anuj-portfolio-ai-chatbot.git
