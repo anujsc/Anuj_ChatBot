@@ -1,6 +1,6 @@
 
 import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { FaGithub, FaLinkedin, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 
@@ -21,8 +21,8 @@ interface SocialLink {
 }
 const socialLinks: SocialLink[] = [
 	{ icon: <FaGithub />, url: "https://github.com/anujsc", label: "GitHub" },
-	{ icon: <FaLinkedin />, url: "https://linkedin.com/in/anujsc", label: "LinkedIn" },
-	{ icon: <FaInstagram />, url: "https://instagram.com/anujsc", label: "Instagram" },
+	{ icon: <FaLinkedin />, url: "https://www.linkedin.com/in/anuj-chaudhari-78a0a9256?utm_source=share_via&utm_content=profile&utm_medium=member_android", label: "LinkedIn" },
+	{ icon: <FaInstagram />, url: "https://www.instagram.com/ssup_its_anuj?igsh=bGg5b2Y4dnB5d2Zp", label: "Instagram" },
 ];
 
 
@@ -76,23 +76,24 @@ const Contact: React.FC = () => {
 			});
 	};
 
-	return (
+		return (
 			<section
 				id="contact"
 				className="min-h-screen flex items-center justify-center bg-[#f7f7f7] font-[Inter] px-0 py-0 sm:px-2 sm:py-8"
 			>
-				<motion.div
+				{/* Only animate on sm and up */}
+				<div
 					className="w-full max-w-2xl bg-white rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden border border-gray-200 mx-0 sm:mx-4 my-0 sm:my-8"
-					initial={{ opacity: 0, y: 40 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.7, ease: 'easeOut' }}
+					style={{
+						transition: 'box-shadow 0.2s',
+					}}
 				>
-		{/* Left: Contact Info */}
-					<motion.div
+					{/* Left: Contact Info */}
+					<div
 						className="md:w-1/2 w-full p-5 sm:p-10 flex flex-col justify-between bg-[#fafafa] border-b border-gray-100 md:border-b-0 md:border-r"
-						initial={{ x: -40, opacity: 0 }}
-						animate={{ x: 0, opacity: 1 }}
-						transition={{ delay: 0.2, duration: 0.7, type: 'spring' }}
+						style={{
+							transition: 'background 0.2s',
+						}}
 					>
 						{/* Top bar for mobile */}
 			{/* No top bar for simple look */}
@@ -102,7 +103,7 @@ const Contact: React.FC = () => {
 		     <div className="space-y-2 sm:space-y-4 text-gray-700 text-xs sm:text-base">
 											<div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start">
 												<FaEnvelope className="text-xl text-[#ba3f47]" />
-												<span className="font-medium">anuj@example.com</span>
+												<span className="font-medium">anujpvt2311@gmail.com</span>
 											</div>
 											<div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start">
 												<FaPhone className="text-xl text-[#ba3f47]" />
@@ -134,17 +135,17 @@ const Contact: React.FC = () => {
 												<span className="">[Map / Illustration]</span>
 											</div>
 										</div>
-		</motion.div>
+	  </div>
 
-		{/* Divider for mobile (removed for simple look) */}
-						{/* Right: Contact Form */}
-					<motion.form
+					{/* Divider for mobile (removed for simple look) */}
+					{/* Right: Contact Form */}
+					<form
 						ref={form}
 						onSubmit={handleSubmit}
-	className="md:w-1/2 w-full p-4 sm:p-10 flex flex-col justify-center bg-white rounded-b-2xl md:rounded-b-none md:rounded-r-2xl border-t-0 md:border-l border-gray-200"
-						initial={{ x: 40, opacity: 0 }}
-						animate={{ x: 0, opacity: 1 }}
-						transition={{ delay: 0.3, duration: 0.7, type: 'spring' }}
+						className="md:w-1/2 w-full p-4 sm:p-10 flex flex-col justify-center bg-white rounded-b-2xl md:rounded-b-none md:rounded-r-2xl border-t-0 md:border-l border-gray-200"
+						style={{
+							transition: 'background 0.2s',
+						}}
 					>
 		  <div className="grid grid-cols-1 gap-3 sm:gap-6">
 							<div>
@@ -186,40 +187,37 @@ const Contact: React.FC = () => {
 					{errors.message && <span className="text-xs text-[#570100]/70 mt-1 block">{errors.message}</span>}
 							</div>
 								<div className="flex justify-end mt-2">
-									<motion.button
+									<button
 										type="submit"
-										  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#ba3f47] text-white font-bold text-base sm:text-lg shadow-lg hover:scale-105 active:scale-95 transition-all outline-none font-[Inter] focus:ring-2 focus:ring-[#ba3f47] mt-2 sm:mt-0"
-										whileHover={{ scale: 1.05 }}
-										whileTap={{ scale: 0.97 }}
+										className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#ba3f47] text-white font-bold text-base sm:text-lg shadow-lg hover:scale-105 active:scale-95 transition-all outline-none font-[Inter] focus:ring-2 focus:ring-[#ba3f47] mt-2 sm:mt-0"
 										disabled={loading}
 									>
 										{loading ? "Sending..." : "Send Message"}
-									</motion.button>
+									</button>
 								</div>
 						</div>
 						{/* Success Toast */}
-						<AnimatePresence>
-							{success && (
-								<motion.div
-									className="fixed left-1/2 top-8 z-50 -translate-x-1/2 bg-[#ba3f47] text-white px-6 py-3 rounded-2xl shadow-lg font-semibold text-sm sm:text-base font-[Inter]"
-									initial={{ opacity: 0, y: -30 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -30 }}
-									transition={{ duration: 0.5 }}
-								>
-									Message sent successfully! 🚀
-								</motion.div>
-							)}
-						</AnimatePresence>
+				<AnimatePresence>
+					{success && (
+						<div
+							className="fixed left-1/2 top-8 z-50 -translate-x-1/2 bg-[#ba3f47] text-white px-6 py-3 rounded-2xl shadow-lg font-semibold text-sm sm:text-base font-[Inter]"
+							style={{
+								transition: 'opacity 0.2s',
+							}}
+						>
+							Message sent successfully! 🚀
+						</div>
+					)}
+				</AnimatePresence>
 					{/* Placeholder for map/illustration on mobile */}
 								<div className="mt-4 sm:mt-8 md:hidden">
 									<div className="w-full h-20 sm:h-32 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs sm:text-lg font-semibold border border-gray-200">
 										<span>[Map / Illustration]</span>
 									</div>
 								</div>
-					</motion.form>
-					</motion.div>
-				</section>
+				</form>
+			</div>
+		</section>
 	);
 };
 
