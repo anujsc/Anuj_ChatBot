@@ -6,7 +6,7 @@ import { fetchReadme } from '../utils/github';
 
 const PROJECTS = ['EMS', 'URLShortener', 'ImgEnhancer', 'SCSDB'];
 const GITHUB_MAP: Record<string, { owner: string; repo: string }> = {
-  EMS: { owner: 'anujsc', repo: 'EMS' },
+  EMS: { owner: 'anujsc', repo: '' },
   URLShortener: { owner: 'anujsc', repo: 'URL_SHORTNER' },
   ImgEnhancer: { owner: 'anujsc', repo: 'ImgEnhancer' },
   SCSDB: { owner: 'anujsc', repo: 'SCSDB' }
@@ -71,14 +71,16 @@ const useChat = () => {
 
   const toggleSaveHistory = () => setSaveHistory(v => !v);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  // Accept optional text for direct search (e.g., from voice)
+  const sendMessage = async (text?: string) => {
+    const query = typeof text === 'string' ? text : input;
+    if (!query.trim()) return;
     setError('');
     setLoading(true);
     setTyping(true);
-    const userMsg = { role: 'user', content: input };
+    const userMsg = { role: 'user', content: query };
     let newMessages = [...messages, userMsg];
-    let project = detectProject(input);
+    let project = detectProject(query);
     let botMsg = '';
     if (project) {
       // Try to fetch README

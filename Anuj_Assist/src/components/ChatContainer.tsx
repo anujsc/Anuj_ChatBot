@@ -1,5 +1,7 @@
 // ChatContainer: main chat logic and UI
 import React, { useState, useEffect, useRef } from 'react';
+// Import modular VoiceAssistant component for voice input/output
+import VoiceAssistant from './VoiceAssistant';
 import useChat from '../hooks/useChat';
 import type { Message, ChatBubbleProps } from '../types/chat';
 import { Suspense } from 'react';
@@ -22,6 +24,8 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
     typing
   } = useChat();
 
+  // State for bot voice output (text-to-speech)
+  const [isSpeaking, setIsSpeaking] = useState(true);
   const [isShow] = useState(true);
   const [typewriterText, setTypewriterText] = useState('');
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -78,12 +82,19 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
   const handleInputChange = React.useCallback(setInput, [setInput]);
   const handleSend = React.useCallback(() => sendMessage(), [sendMessage]);
 
+  // Handle voice input (speech-to-text):
+  // Directly send transcribed text to chatbot search logic
+  const handleVoiceInput = (text: string) => {
+    sendMessage(text);
+  };
+
   return (
     <section className="flex flex-col h-[80vh] w-[110vh] rounded-2xl bg-linear-to-br from-gray-200 via-gray-100 to-gray-300 shadow-xl p-6">
+
       {/* Header with save history toggle */}
       <div className="flex justify-between items-center mb-4">
         <span className="font-medium text-xl text-gray-700 flex items-center gap-2 tracking-tighter">
-          <span role="img" aria-label="message">💬</span> Chat with Anuj 
+          <span role="img" aria-label="message">💬</span> Chat with Anuj
         </span>
         <div className="flex items-center gap-3">
           <button
@@ -159,6 +170,16 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
               loading="lazy"
               decoding="async"
             />
+            {/* Voice Assistant UI: mic for input, toggle for output */}
+            <div className="flex justify-end mb-2">
+              <VoiceAssistant
+                onVoiceInput={handleVoiceInput}
+                isSpeaking={isSpeaking}
+                setIsSpeaking={setIsSpeaking}
+                // Pass latest bot reply for speech synthesis
+                botReply={messages.length > 0 ? messages[messages.length - 1].role === 'assistant' ? messages[messages.length - 1].content : undefined : undefined}
+              />
+            </div>
           </div>
         )}
 
