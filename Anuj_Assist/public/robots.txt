@@ -1,0 +1,11 @@
+# robots.txt for Anuj ChatBot Portfolio
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /*.json$
+
+# Sitemap
+Sitemap: https://anujchatbot.netlify.app/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

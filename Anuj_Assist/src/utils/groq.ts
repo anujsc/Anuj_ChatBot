@@ -1,7 +1,7 @@
 // Groq API helper
-const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY || '';
+const GROQ_KEY = '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';
 // Use a valid, free Groq model (e.g., mixtral-8x7b-32768 or gemma-7b-it)
-const GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || '';
+const GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-20b';
 
 export interface GroqMessage {
   role: string;

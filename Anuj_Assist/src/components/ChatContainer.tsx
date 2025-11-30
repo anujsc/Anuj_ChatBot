@@ -1,19 +1,19 @@
 // ChatContainer: main chat logic and UI
-import React, { useState, useEffect, useRef } from 'react';
-// Import modular VoiceAssistant component for voice input/output
-import VoiceAssistant from './VoiceAssistant';
+import React, { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
+import { useToast } from '../hooks/useToast';
 import useChat from '../hooks/useChat';
 import type { Message, ChatBubbleProps } from '../types/chat';
-import { Suspense } from 'react';
-const ChatInput = React.lazy(() => import('./ChatInput'));
-const Loader = React.lazy(() => import('./Loader'));
-const ChatBubble = React.lazy(() => import('./ChatBubble'));
+
+const ChatInput = lazy(() => import('./ChatInput'));
+const Loader = lazy(() => import('./Loader'));
+const ChatBubble = lazy(() => import('./ChatBubble'));
 
 interface ChatContainerProps {
   setShowContact: (show: boolean) => void;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
+  const toast = useToast();
   const {
     messages,
     input,
@@ -22,13 +22,15 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
     loading,
     error,
     typing
-  } = useChat();
+  } = useChat(toast);
 
   // State for bot voice output (text-to-speech)
-  const [isSpeaking, setIsSpeaking] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [isShow] = useState(true);
   const [typewriterText, setTypewriterText] = useState('');
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const recognitionRef = useRef<any>(null);
 
   const lines = [
     "Ask me about Anuj Chaudhari's projects, tech stack, or career.",
@@ -36,13 +38,13 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
   ];
 
   // Memoize highlightWords for performance
-  const highlightWords = React.useCallback((text: string) => {
+  const highlightWords = useCallback((text: string) => {
     return text.replace(/hello|experience/gi, (match) =>
       `<span class='font-mono bg-gray-200 px-1 rounded' style='color:#ba3f47;'>${match}</span>`
     );
   }, []);
 
-  // Typewriter effect for initial prompt
+  // Typewriter effect for initial prompt - optimized with RAF
   useEffect(() => {
     if (messages.length > 0) {
       setTypewriterText(lines.join('\n'));
@@ -70,42 +72,140 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
     }
   }, [typewriterText, currentLineIndex, messages.length, lines]);
 
-  // Ref for auto-scroll
+  // Ref for auto-scroll - debounced for performance
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (endOfMessagesRef.current) {
-      endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    const timer = setTimeout(() => {
+      if (endOfMessagesRef.current) {
+        endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages, typing]);
 
   // Memoize input handlers for performance
-  const handleInputChange = React.useCallback(setInput, [setInput]);
-  const handleSend = React.useCallback(() => sendMessage(), [sendMessage]);
+  const handleInputChange = useCallback(setInput, [setInput]);
+  const handleSend = useCallback(() => sendMessage(), [sendMessage]);
 
   // Handle voice input (speech-to-text):
-  // Directly send transcribed text to chatbot search logic
-  const handleVoiceInput = (text: string) => {
+  // Directly send the transcribed text
+  const handleVoiceInput = useCallback((text: string) => {
     sendMessage(text);
+  }, [sendMessage]);
+
+  // Speech Recognition setup
+  const getSpeechRecognition = () => {
+    if ('webkitSpeechRecognition' in window) {
+      return new (window as any).webkitSpeechRecognition();
+    } else if ('SpeechRecognition' in window) {
+      return new (window as any).SpeechRecognition();
+    }
+    return null;
   };
 
+  // Handle mic click - memoized
+  const handleMicClick = useCallback(() => {
+    // Prevent mic usage while a response is being generated
+    if (loading || typing) {
+      toast.error('Please wait for the current response to complete');
+      return;
+    }
+    
+    if (!isListening) {
+      if (!recognitionRef.current) {
+        recognitionRef.current = getSpeechRecognition();
+        if (!recognitionRef.current) {
+          toast.error('Speech recognition not supported in this browser');
+          return;
+        }
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'en-US';
+        
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          toast.success('Voice captured');
+          handleVoiceInput(transcript);
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          if (event.error === 'no-speech') {
+            toast.error('No speech detected. Please try again');
+          } else if (event.error === 'not-allowed') {
+            toast.error('Microphone access denied. Please enable it in browser settings');
+          } else {
+            toast.error(`Speech recognition error: ${event.error}`);
+          }
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+      recognitionRef.current.start();
+      setIsListening(true);
+      toast.success('Listening... Speak now');
+    } else {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      toast.info('Stopped listening');
+    }
+  }, [loading, typing, toast, handleVoiceInput, isListening]);
+
+  // Handle speaker toggle - speak the last assistant message when clicked - memoized
+  const handleSpeakerToggle = useCallback(() => {
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      toast.error('Text-to-speech not supported in this browser');
+      return;
+    }
+
+    if (!isSpeaking) {
+      // User wants to hear the message - find last assistant message and speak it
+      const lastAssistantMessage = [...messages].reverse().find(msg => msg.role === 'assistant');
+      if (lastAssistantMessage) {
+        const utter = new SpeechSynthesisUtterance(lastAssistantMessage.content);
+        utter.lang = 'en-US';
+        utter.onend = () => {
+          setIsSpeaking(false);
+          toast.success('Finished speaking');
+        };
+        synth.speak(utter);
+        setIsSpeaking(true);
+        toast.success('Speaking response...');
+      } else {
+        toast.error('No response to speak');
+      }
+    } else {
+      // User wants to stop speaking
+      synth.cancel();
+      setIsSpeaking(false);
+      toast.info('Stopped speaking');
+    }
+  }, [isSpeaking, messages, toast]);
+
   return (
-    <section className="flex flex-col h-[80vh] w-[110vh] rounded-2xl bg-linear-to-br from-gray-200 via-gray-100 to-gray-300 shadow-xl p-6">
+    <section className="flex flex-col h-[80vh] w-full max-w-[110vh] rounded-2xl bg-linear-to-br from-gray-200 via-gray-100 to-gray-300 shadow-xl p-4 sm:p-6">
 
       {/* Header with save history toggle */}
       <div className="flex justify-between items-center mb-4">
-        <span className="font-medium text-xl text-gray-700 flex items-center gap-2 tracking-tighter">
-          <span role="img" aria-label="message">💬</span> Chat with Anuj
-        </span>
+       
         <div className="flex items-center gap-3">
           <button
-            className="ml-2 px-4 py-2 tracking-tighter rounded-lg bg-linear-to-r from-[#721319] to-[#ba3f47] text-white font-semibold shadow hover:scale-105 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-[#6C63FF]"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base tracking-tighter rounded-lg bg-linear-to-r from-[#721319] to-[#ba3f47] text-white font-semibold shadow hover:scale-105 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-[#6C63FF]"
             onClick={() => setShowContact(true)}
             aria-label="Open Contact"
             type="button"
           >
-            Contact Me
+            Contact<span className="hidden sm:inline"> Me</span>
           </button>
         </div>
+         <span className="font-medium text-lg sm:text-xl text-gray-700 flex items-center gap-2 tracking-tighter">
+          <span role="img" aria-label="message">💬</span> <span className="hidden sm:inline">Chat with Anuj</span><span className="sm:hidden">Chat</span>
+        </span>
       </div>
 
       {/* Messages container */}
@@ -144,11 +244,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
           }
         `}</style>
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center text-gray-700">
-            <span className="text-4xl md:text-5xl font-extrabold mb-2 font-[Inter] tracking-tight" style={{ fontFamily: 'Inter, Arial, sans-serif', letterSpacing: '-1px' }}>
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-700 px-4">
+            <span className="text-4xl sm:text-4xl md:text-5xl font-extrabold mb-2 font-[Inter] tracking-tight" style={{ fontFamily: 'Inter, Arial, sans-serif', letterSpacing: '-1px' }}>
               How can I help you today?
             </span>
-            <div className="text-base md:text-lg font-light mb-4 font-[Fira Sans] min-h-14" style={{ fontFamily: 'Fira Sans, Arial, sans-serif', color: '#555', letterSpacing: '-0.5px' }}>
+            <div className="text-md sm:text-base md:text-lg font-light mb-4 font-[Fira Sans] min-h-14" style={{ fontFamily: 'Fira Sans, Arial, sans-serif', color: '#555', letterSpacing: '-0.5px' }}>
               {typewriterText.split('\n').map((line, index) => (
                 <React.Fragment key={index}>
                   {index === 1
@@ -162,24 +262,16 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
               )}
             </div>
             <img
-              className="h-[16vh] mb-2"
+              className="h-[12vh] sm:h-[5vh] mb-2"
               role="img"
               aria-label="robot"
               src="https://i.pinimg.com/736x/b5/0e/da/b50eda106e100539b904eadecb125a30.jpg"
-              alt="robot"
+              alt="Friendly robot assistant illustration"
+              width="100"
+              height="100"
               loading="lazy"
               decoding="async"
             />
-            {/* Voice Assistant UI: mic for input, toggle for output */}
-            <div className="flex justify-end mb-2">
-              <VoiceAssistant
-                onVoiceInput={handleVoiceInput}
-                isSpeaking={isSpeaking}
-                setIsSpeaking={setIsSpeaking}
-                // Pass latest bot reply for speech synthesis
-                botReply={messages.length > 0 ? messages[messages.length - 1].role === 'assistant' ? messages[messages.length - 1].content : undefined : undefined}
-              />
-            </div>
           </div>
         )}
 
@@ -222,6 +314,10 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ setShowContact }) => {
           onChange={handleInputChange}
           onSend={handleSend}
           loading={loading}
+          onMicClick={handleMicClick}
+          onSpeakerToggle={handleSpeakerToggle}
+          isListening={isListening}
+          isSpeaking={isSpeaking}
         />
       </Suspense>
       <div className="mt-4 text-center text-xs text-gray-400">

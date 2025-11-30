@@ -1,9 +1,9 @@
 // ChatBubble: user/bot message bubble
-import React from 'react';
+import React, { useEffect, useState, memo } from 'react';
+import type { ChatBubbleProps } from '../types/chat';
 
-
-// Helper to render links clickable and remove markdown stars
-function formatBotContent(text: string): string {
+// Helper to render links clickable and remove markdown stars - memoized
+const formatBotContent = (text: string): string => {
   // Remove markdown bold/italic stars
   let clean = text.replace(/\*\*/g, '').replace(/\*/g, '');
   // Convert URLs to clickable links
@@ -11,23 +11,21 @@ function formatBotContent(text: string): string {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#1549e6;text-decoration:underline;">${url}</a>`;
   });
   return clean;
-}
+};
 
-import type { ChatBubbleProps } from '../types/chat';
-
-const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content, profileIcon, time, animate }) => {
-  const [visible, setVisible] = React.useState(false);
+const ChatBubble: React.FC<ChatBubbleProps> = memo(({ role, content, profileIcon, time, animate }) => {
+  const [visible, setVisible] = useState(false);
 
   // Typewriter state for AI (bot) messages
-  const [typedContent, setTypedContent] = React.useState(role === 'user' ? content : '');
-  const [typewriterDone, setTypewriterDone] = React.useState(role === 'user');
+  const [typedContent, setTypedContent] = useState(role === 'user' ? content : '');
+  const [typewriterDone, setTypewriterDone] = useState(role === 'user');
 
-  React.useEffect(() => {
+  useEffect(() => {
     setVisible(true);
   }, []);
 
-  // Typewriter effect for AI (bot) only, optimized for smoothness
-  React.useEffect(() => {
+  // Typewriter effect for AI (bot) only, optimized for smoothness with RAF
+  useEffect(() => {
     if (role !== 'user' && animate !== false) {
       setTypedContent('');
       setTypewriterDone(false);
@@ -79,9 +77,18 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content, profileIcon, tim
         {/* Profile Icon */}
         <img
           src={profileIcon}
-          alt={role === 'user' ? 'User' : 'AI'}
-          className="w-8 h-8 rounded-full shadow border border-gray-300"
-          style={{ minWidth: 32, minHeight: 32 }}
+          alt={role === 'user' ? 'User profile' : 'AI assistant'}
+          className="w-8 h-8 rounded-full shadow-md border-2 border-gray-300 object-cover"
+          width="32"
+          height="32"
+          loading="lazy"
+          decoding="async"
+          style={{ 
+            minWidth: 32, 
+            minHeight: 32,
+            borderRadius: '50%',
+            aspectRatio: '1/1'
+          }}
         />
         <div className="flex flex-col max-w-[80%]">
           {/* Message Bubble */}
@@ -122,8 +129,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content, profileIcon, tim
       `}</style>
     </div>
   );
-};
-
-// (CSS for anchor tags is now in globals.css)
+});
 
 export default ChatBubble;

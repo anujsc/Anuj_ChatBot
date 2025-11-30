@@ -1,74 +1,71 @@
-// Slideshow background with fade effect
+// Optimized slideshow background with fade effect and lazy loading
 import { bgImages } from '../data/bgImages';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-
-const SLIDESHOW_INTERVAL = 5000;
-const FADE_DURATION = 800; // ms (should match App)
+const SLIDESHOW_INTERVAL = 6000; // Increased for better performance
+const FADE_DURATION = 1000;
 
 const BackgroundSlideshow: React.FC = () => {
-  const [current, setCurrent] = React.useState(0);
-  const [prev, setPrev] = React.useState(0);
-  const [showPrev, setShowPrev] = React.useState(false);
+  const [current, setCurrent] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // Preload images progressively
+  useEffect(() => {
+    const preloadImage = (src: string) => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Don't block on error
+        img.src = src;
+      });
+    };
 
-  // Preload next image for smooth transition
-  React.useEffect(() => {
+    // Preload first image immediately
+    preloadImage(bgImages[0]).then(() => setIsLoaded(true));
+
+    // Preload remaining images in background
+    bgImages.slice(1).forEach(src => {
+      requestIdleCallback(() => preloadImage(src), { timeout: 2000 });
+    });
+  }, []);
+
+  // Memoized next image preloader
+  const preloadNext = useCallback(() => {
     const nextIdx = (current + 1) % bgImages.length;
-    const img = new window.Image();
+    const img = new Image();
     img.src = bgImages[nextIdx];
   }, [current]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    preloadNext();
+  }, [preloadNext]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    
     const interval = setInterval(() => {
-      setPrev(current);
-      setCurrent((prevIdx) => (prevIdx + 1) % bgImages.length);
-      setShowPrev(true);
-      setTimeout(() => setShowPrev(false), FADE_DURATION);
+      setCurrent((prev) => (prev + 1) % bgImages.length);
     }, SLIDESHOW_INTERVAL);
+    
     return () => clearInterval(interval);
-  }, [current]);
+  }, [isLoaded]);
+
+  if (!isLoaded) return null;
 
   return (
-    <>
-      {/* Previous image for crossfade */}
-      {showPrev && (
-        <div
-          aria-hidden="true"
-          className="fixed inset-0 -z-20 pointer-events-none"
-          style={{
-            backgroundImage: `url(${bgImages[prev]})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 1,
-            transition: `opacity ${FADE_DURATION}ms ease-in-out`,
-            willChange: 'opacity',
-            animation: `fadeOutBg ${FADE_DURATION}ms forwards`,
-          }}
-        />
-      )}
-      {/* Current image always visible */}
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          backgroundImage: `url(${bgImages[current]})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 1,
-          transition: `opacity ${FADE_DURATION}ms ease-in-out`,
-          willChange: 'opacity',
-        }}
-      />
-      <style>{`
-        @keyframes fadeOutBg {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
-      `}</style>
-    </>
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 -z-10 pointer-events-none"
+      style={{
+        backgroundImage: `url(${bgImages[current]})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        transition: `opacity ${FADE_DURATION}ms ease-in-out`,
+        willChange: 'opacity',
+      }}
+    />
   );
 };
-export default BackgroundSlideshow;
+
+export default React.memo(BackgroundSlideshow);

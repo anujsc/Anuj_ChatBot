@@ -2,14 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://img.icons8.com/doodle-line/1200/bot.jpg  " />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="https://img.icons8.com/doodle-line/1200/bot.jpg" />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://i.pinimg.com" />
+    
+    <!-- Optimized font loading with display=swap -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>anuj-assist</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Anuj Chaudhari - Portfolio AI ChatBot | Frontend Developer</title>
+    <meta name="description" content="Chat with Anuj Chaudhari's AI assistant to learn about his projects, tech stack, and experience as a Frontend Developer. Built with React, TypeScript, and Groq AI." />
+    <meta name="keywords" content="Anuj Chaudhari, Portfolio, AI ChatBot, Frontend Developer, React, TypeScript, Web Development" />
+    <meta name="author" content="Anuj Chaudhari" />
+    <link rel="canonical" href="https://anujchatbot.netlify.app/" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://anujchatbot.netlify.app/" />
+    <meta property="og:title" content="Anuj Chaudhari - Portfolio AI ChatBot" />
+    <meta property="og:description" content="Chat with Anuj's AI assistant to explore his projects and skills" />
+    <meta property="og:image" content="https://anujchatbot.netlify.app/og-image.jpg" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Anuj Chaudhari - Portfolio AI ChatBot" />
+    <meta name="twitter:description" content="Chat with Anuj's AI assistant to explore his projects and skills" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#ba3f47" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    
+    <!-- Performance: DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://api.groq.com" />
+    
+    <!-- Inline critical CSS for instant paint -->
+    <style>
+      body { margin: 0; background: #000; font-family: Inter, system-ui, sans-serif; }
+      #root { min-height: 100vh; }
+      .loader-fallback { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a0a0e 0%, #000 100%); z-index: 9999; }
+      .loader-fallback::after { content: ''; width: 48px; height: 48px; border: 4px solid #ba3f47; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Fallback loader for instant feedback -->
+    <div id="root"><div class="loader-fallback"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

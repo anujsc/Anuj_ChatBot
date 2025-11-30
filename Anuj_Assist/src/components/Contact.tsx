@@ -1,8 +1,10 @@
 
 import React, { useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useToast } from '../hooks/useToast';
 import { FaGithub, FaLinkedin, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
-import emailjs from "@emailjs/browser";
+
+// Lazy load EmailJS only when needed
+const loadEmailJS = () => import("@emailjs/browser");
 
 // EmailJS setup notes:
 // 1. Sign up at https://www.emailjs.com/
@@ -38,6 +40,7 @@ interface FormErrors {
 }
 
 const Contact: React.FC = () => {
+	const toast = useToast();
 	const form = useRef<HTMLFormElement | null>(null);
 	const [formData, setFormData] = useState<FormData>({ name: "", email: "", message: "" });
 	const [errors, setErrors] = useState<FormErrors>({});
@@ -59,21 +62,28 @@ const Contact: React.FC = () => {
 		setErrors({ ...errors, [e.target.name]: undefined });
 	};
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (!validate()) return;
+		if (!validate()) {
+			toast.error('Please fill in all required fields correctly');
+			return;
+		}
 		setLoading(true);
-		emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current as HTMLFormElement, USER_ID)
-			.then(() => {
-				setSuccess(true);
-				setFormData({ name: "", email: "", message: "" });
-				setLoading(false);
-				setTimeout(() => setSuccess(false), 3000);
-			})
-			.catch(() => {
-				setLoading(false);
-				alert("Failed to send. Please try again.");
-			});
+		toast.info('Sending your message...');
+		
+		try {
+			// Dynamically import EmailJS only when sending
+			const emailjs = await loadEmailJS();
+			await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current as HTMLFormElement, USER_ID);
+			setSuccess(true);
+			setFormData({ name: "", email: "", message: "" });
+			setLoading(false);
+			toast.success('Message sent successfully! 🚀');
+			setTimeout(() => setSuccess(false), 3000);
+		} catch (error: any) {
+			setLoading(false);
+			toast.error(`Failed to send message: ${error.text || 'Please try again'}`);
+		}
 	};
 
 		return (
@@ -196,19 +206,14 @@ const Contact: React.FC = () => {
 									</button>
 								</div>
 						</div>
-						{/* Success Toast */}
-				<AnimatePresence>
-					{success && (
-						<div
-							className="fixed left-1/2 top-8 z-50 -translate-x-1/2 bg-[#ba3f47] text-white px-6 py-3 rounded-2xl shadow-lg font-semibold text-sm sm:text-base font-[Inter]"
-							style={{
-								transition: 'opacity 0.2s',
-							}}
-						>
-							Message sent successfully! 🚀
-						</div>
-					)}
-				</AnimatePresence>
+						{/* Success Toast - removed AnimatePresence for lighter bundle */}
+				{success && (
+					<div
+						className="fixed left-1/2 top-8 z-50 -translate-x-1/2 bg-[#ba3f47] text-white px-6 py-3 rounded-2xl shadow-lg font-semibold text-sm sm:text-base font-[Inter] animate-fade-in"
+					>
+						Message sent successfully! 🚀
+					</div>
+				)}
 					{/* Placeholder for map/illustration on mobile */}
 								<div className="mt-4 sm:mt-8 md:hidden">
 									<div className="w-full h-20 sm:h-32 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs sm:text-lg font-semibold border border-gray-200">

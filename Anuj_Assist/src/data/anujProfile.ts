@@ -6,7 +6,7 @@ const anujProfile = {
   location: "jalgaon, India",
   email: "anujpvt2311@gmail.com",
   github: "https://github.com/anujsc",
-  portfolio: "https://anujportfoolioo.netlify.app/",
+  portfolio: "https://anujportfoolioo.netlify.app",
   linkedin: "https://www.linkedin.com/in/anuj-chaudhari-78a0a9256",
   experience: [
     {
@@ -67,7 +67,7 @@ const anujProfile = {
       description: "Personal portfolio built with React and Tailwind CSS, GSAP, Framer-Motion etc showcasing projects and skills with smooth animations.",
       tech: ["React", "TailwindCSS", "GSAP", "Framer-Motion"],
       repo: "https://github.com/anujsc/Portfolio",
-      deployed: "https://anujportfoolioo.netlify.app/"
+      deployed: "https://anujportfoolioo.netlify.app"
     },
     {
       key: "chatbot",
