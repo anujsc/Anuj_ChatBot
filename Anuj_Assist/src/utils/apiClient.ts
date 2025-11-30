@@ -1,7 +1,7 @@
 // Unified API client for OpenAI and Groq
 import { callGroq } from './groq';
 
-const GROQ_KEY = "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";
+const GROQ_KEY =  import.meta.env.VITE_GROQ_API_KEY;
 
 export interface ChatMessage {
   role: string;
